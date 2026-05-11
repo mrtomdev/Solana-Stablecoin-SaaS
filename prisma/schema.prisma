@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model StablecoinConfig {
+  id              String   @id @default(cuid())
+  mintAddress     String   @unique
+  name            String
+  symbol          String
+  decimals        Int      @default(6)
+  description     String?
+  image           String?
+  banner          String?
+  website         String?
+  twitter         String?
+  telegram        String?
+  discord         String?
+  mintAuthority   String
+  freezeAuthority String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AdminAction {
+  id          String   @id @default(cuid())
+  mintAddress String
+  action      String   // MINT, BURN, FREEZE, THAW, UPDATE_METADATA, CREATE
+  signature   String?
+  details     String?  // JSON string
+  walletAddress String
+  status      String   @default("CONFIRMED") // PENDING, CONFIRMED, FAILED
+  createdAt   DateTime @default(now())
+
+  @@index([mintAddress])
+  @@index([createdAt])
+}
+
+model SupplySnapshot {
+  id          String   @id @default(cuid())
+  mintAddress String
+  supply      String   // stored as string to handle large numbers
+  holders     Int      @default(0)
+  timestamp   DateTime @default(now())
+
+  @@index([mintAddress, timestamp])
+}
+
+model PegConfig {
+  id                 String   @id @default(cuid())
+  mintAddress        String   @unique
+  targetPrice        Float    @default(1.0)
+  deviationThreshold Float    @default(0.02)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model PegHistory {
+  id          String   @id @default(cuid())
+  mintAddress String
+  price       Float
+  deviation   Float
+  timestamp   DateTime @default(now())
+
+  @@index([mintAddress, timestamp])
+}
+
+model LiquidityConfig {
+  id              String   @id @default(cuid())
+  mintAddress     String   @unique
+  totalLiquidity  Float    @default(0)
+  reserveTarget   Float    @default(100)
+  collateralRatio Float    @default(1.0)
+  reserveBalance  Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FeeConfig {
+  id                        String   @id @default(cuid())
+  mintAddress               String   @unique
+  mintFee                   Float    @default(0)
+  mintFeeEnabled            Boolean  @default(false)
+  burnFee                   Float    @default(0)
+  burnFeeEnabled            Boolean  @default(false)
+  transferFee               Float    @default(0)
+  transferFeeEnabled        Boolean  @default(false)
+  stabilityFee              Float    @default(0)
+  stabilityFeeEnabled       Boolean  @default(false)
+  liquidationPenalty        Float    @default(0)
+  liquidationPenaltyEnabled Boolean  @default(false)
+  feeCollectorAddress       String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+}
+
+model FeeRevenue {
+  id          String   @id @default(cuid())
+  mintAddress String
+  feeType     String
+  amount      Float
+  signature   String?
+  timestamp   DateTime @default(now())
+
+  @@index([mintAddress, timestamp])
+  @@index([mintAddress, feeType])
+}
+
+model PauseState {
+  id            String   @id @default(cuid())
+  mintAddress   String   @unique
+  globalPause   Boolean  @default(false)
+  mintPause     Boolean  @default(false)
+  burnPause     Boolean  @default(false)
+  transferPause Boolean  @default(false)
+  freezePause   Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+}
+
+model CircuitBreakerConfig {
+  id                    String   @id @default(cuid())
+  mintAddress           String   @unique
+  supplyChangeThreshold Float    @default(10)
+  timeWindowMinutes     Int      @default(60)
+  autoPauseEnabled      Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model PauseHistory {
+  id            String   @id @default(cuid())
+  mintAddress   String
+  action        String
+  scope         String
+  reason        String?
+  walletAddress String
+  timestamp     DateTime @default(now())
+
+  @@index([mintAddress, timestamp])
+}
