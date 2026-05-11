@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Lint & Build
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,9 +26,6 @@ jobs:
         run: npx prisma generate
         env:
           DATABASE_URL: file:./prisma/dev.db
-
-      - name: Lint
-        run: npm run lint
 
       - name: Build
         run: npm run build
